@@ -36,10 +36,6 @@ public class UserDaoHibernateImpl implements UserDao {
             currentSession.createSQLQuery(CREATE_TABLE).executeUpdate();
             transaction.commit();
         } catch (Exception e) {
-            if (transaction != null) {
-                transaction.rollback();
-                System.out.println("Transaction is rolled back.");
-            }
             System.out.println("Ошибка при создании таблицы:" + e.getMessage());
         }
 
@@ -53,10 +49,6 @@ public class UserDaoHibernateImpl implements UserDao {
             currentSession.createSQLQuery(DROP_TABLE).executeUpdate();
             transaction.commit();
         } catch (Exception e) {
-            if (transaction != null) {
-                transaction.rollback();
-                System.out.println("Transaction is rolled back.");
-            }
             System.out.println("Ошибка приудалении таблицы: " + e.getMessage());
         }
     }
@@ -83,14 +75,19 @@ public class UserDaoHibernateImpl implements UserDao {
         try (Session currentSession = Util.getSessionFactory().openSession()){
             transaction = currentSession.beginTransaction();
             User userToBeDeleted = currentSession.get(User.class, id);
-            currentSession.delete(userToBeDeleted);
+            if (userToBeDeleted != null){
+                currentSession.delete(userToBeDeleted);
+                System.out.println("User with id " + id + " has been deleted.");
+            } else {
+                System.out.println("User with id " + id + " is not found.");
+            }
             transaction.commit();
         } catch (Exception e) {
             if (transaction != null) {
                 transaction.rollback();
                 System.out.println("Transaction is rolled back.");
             }
-            System.out.println("Ошибка прудалении user-а: " + e.getMessage());
+            System.out.println("Ошибка при удалении user-а: " + e.getMessage());
         }
     }
 
@@ -120,9 +117,6 @@ public class UserDaoHibernateImpl implements UserDao {
             currentSession.createSQLQuery(CLEAN_TABLE).executeUpdate();
             transaction.commit();
         } catch (Exception e) {
-            if (transaction != null) {
-                System.out.println("Transaction is rolled back.");
-            }
             System.out.println("Ошибка при очистке таблицы: " + e.getMessage());
         }
     }
